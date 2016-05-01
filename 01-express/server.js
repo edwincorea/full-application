@@ -1,7 +1,8 @@
 "use strict";
 
 var http = require("http"),
-    express = require("express");
+    express = require("express"),
+    socketIo = require("socket.io");
     
 const app = express();
 
@@ -15,26 +16,26 @@ app.set("view engine", "jade");
 //2. Static middleware
 //3. Authentication middleware
 
-app.use((request, response, next) => {
-    console.log("--- In middleware 1");
+//app.use((request, response, next) => {
+    //console.log("--- In middleware 1");
     //response.write("Header"); 
-    next();    
-    console.log("--- Out of middleware 1");
-});
+    //next();    
+    //console.log("--- Out of middleware 1");
+//});
 
 //Serve out static files with Express static middleware
 app.use(express.static("./public"));
 
-app.use((request, response, next) => {
-    console.log("--- In middleware 2");
+//app.use((request, response, next) => {
+    //console.log("--- In middleware 2");
     //response.write("Other"); 
-    next();    
-    console.log("--- Out of middleware 2");
-});
+    //next();    
+    //console.log("--- Out of middleware 2");
+//});
 
 app.get("/", (request, response) => {
     response.end("Hello, World!");
-    console.log("In handler");     
+    //console.log("In handler");     
 });
 
 app.get("/home", (request, response) => {
@@ -42,6 +43,16 @@ app.get("/home", (request, response) => {
 });
 
 const server = new http.Server(app);
+
+const io = socketIo(server); //it will attach itself to http server
+io.on("connection", (socket) => {
+    console.log("Client connected");
+    socket.on("chat:add", (data) => {
+        console.log(data);
+        
+        io.emit("chat:added", data); //broadcasts to all other sockets listening (chat room)
+    });    
+});
 
 const port = 3000;
 server.listen(port, () => {
