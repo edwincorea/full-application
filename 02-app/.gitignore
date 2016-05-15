@@ -7,3 +7,4 @@ vendor
 assets
 jspm_packages
 build
+public/build
