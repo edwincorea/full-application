@@ -3,6 +3,7 @@ import webpack from "webpack";
 import chalk from "chalk";
 import rimraf from "rimraf";
 import {create as createServerConfig} from "./webpack.server";
+import {create as createClientConfig} from "./webpack.client";
 
 const $ = require("gulp-load-plugins")();
 
@@ -22,6 +23,18 @@ gulp.task("dev", gulp
             devServerReload)));
 
 gulp.task("prod:server", gulp.series("clean:server", prodServerBuild));
+gulp.task("prod:client", gulp.series("clean:client", prodClientBuild));
+gulp.task("prod", gulp.series("clean", gulp.parallel(prodServerBuild, prodClientBuild)));
+
+// --------------------------------------
+// Private Client tasks
+function prodClientBuild(callback){
+    const prodClientWebpack = webpack(createClientConfig(false));
+    prodClientWebpack.run((error, stats) => {
+        outputWebpack("prod:client", error, stats);
+        callback();
+    });       
+}
 
 // --------------------------------------
 // Private Server tasks
@@ -29,8 +42,8 @@ const devServerWebpack = webpack(createServerConfig(true));
 
 function devServerBuild(callback){
     devServerWebpack.run((error, stats) => {
-       outputWebpack("dev:server", error, stats);
-       callback();
+        outputWebpack("dev:server", error, stats);
+        callback();
     });    
 }
 
@@ -42,20 +55,20 @@ function devServerWatch() {
 
 function devServerReload() {
     return $.nodemon({
-       script: "./build/server",
-       watch: "./build",
-       env: {
-           "NODE_ENV": "development",
-           "USE_WEBPACK": "true"
-       }  
+        script: "./build/server",
+        watch: "./build",
+        env: {
+            "NODE_ENV": "development",
+            "USE_WEBPACK": "true"
+        }  
     });    
 }
 
 function prodServerBuild(callback){
     const prodServerWebpack = webpack(createServerConfig(false));
     prodServerWebpack.run((error, stats) => {
-       outputWebpack("prod:server", error, stats);
-       callback();
+        outputWebpack("prod:server", error, stats);
+        callback();
     });       
 }
 
