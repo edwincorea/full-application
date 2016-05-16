@@ -3,6 +3,10 @@ import "source-map-support/register";
 import express from "express";
 import http from "http";
 import socketIo from "socket.io";
+import chalk from "chalk";
+import {Observable} from "rxjs";
+
+import {ObservableSocket} from "../shared/observable-socket";
 
 const isDevelopment = process.env.NODE_ENV !== "production";
 
@@ -11,7 +15,6 @@ const isDevelopment = process.env.NODE_ENV !== "production";
 const app = express();
 const server = new http.Server(app);
 const io = socketIo(server);
-import chalk from "chalk";
 
 //--------------------------------------------
 // Client Webpack
@@ -63,6 +66,13 @@ app.get("/", (req, res) => {
 // Socket
 io.on("connection", socket => {
     console.log(`Got connection from ${socket.request.connection.remoteAddress}`);
+    
+    const client = new ObservableSocket(socket);
+    client.onAction("login", credentials => {
+        //synchronous
+        //return {user: credentials.username};        
+        return Observable.of(`User: ${credentials.username}`).delay(3000);        
+    });
 });
 
 
