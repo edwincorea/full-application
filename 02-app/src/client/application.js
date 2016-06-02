@@ -20,6 +20,7 @@ services.server
 
 //-------------------------------------
 //Components
+require("./components/player/player");
 
 
 //-------------------------------------
