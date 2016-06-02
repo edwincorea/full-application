@@ -32,7 +32,7 @@ export class ComponentBase {
 
 //helper subclass of component base
 export class ElementComponent extends ComponentBase {
-    get $element() { return this.$element; }
+    get $element() { return this._$element; }
     
     constructor(elementType = "div") {
         super();
