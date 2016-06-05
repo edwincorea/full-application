@@ -1,4 +1,13 @@
 import $ from "jquery";
+import {Observable} from "rxjs";
+
+//"Hijack" Observable subscribe method, so we destroy subscriptions for components that are detached.
+//Clean up our subscriptions for detached components.
+Observable.prototype.componentSubscribe = function(component, ...args) {
+    let subscription = this.subscribe(...args);
+    component._onDetachHandlers.push(() => subscription.unsubscribe());
+    return subscription;
+};
 
 export class ComponentBase {
     //attach to a DOM mount point

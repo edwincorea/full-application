@@ -2,13 +2,12 @@
 
 import io from "socket.io-client";
 
-import {ObservableSocket} from "../shared/observable-socket"; 
+import {ObservableSocket} from "../shared/observable-socket";
+import {UsersStore} from "./stores/users"; 
 
 export const socket = io({ autoConnect: false});
+
 //observable socket
 export const server = new ObservableSocket(socket);
 
-//create playlist store
-//create user store
-//create chat store
- 
+export const usersStore = new UsersStore(server); 

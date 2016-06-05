@@ -31,6 +31,15 @@ export class UsersModule extends ModuleBase {
     
     //Add a client API
     registerClient(client) {
+        //Pretend every two seconds a new user is registered...
+        let index = 0;
+        setInterval(() => {
+            const username = `New user ${index}`;
+            const user = {name: username, color: this.getColorForUsername(username)};
+            client.emit("users:added", user);
+            index++;                        
+        }, 2000);
+        
         client.onActions({
             "users:list": () => {
                 return this._userList;
