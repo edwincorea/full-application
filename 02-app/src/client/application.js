@@ -28,3 +28,6 @@ require("./components/playlist/playlist");
 //-------------------------------------
 //Boostrap
 services.socket.connect();
+
+services.server.emitAction$("users:list")
+    .subscribe(users => console.log(users));
