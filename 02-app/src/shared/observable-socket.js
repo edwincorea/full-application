@@ -1,9 +1,19 @@
 import {Observable, ReplaySubject} from "rxjs";
 
+//helper methods
 export function clientMessage(message) {
     const error = new Error(message);
     error.clientMessage = message;
     return error;
+}
+
+export function fail(message) {
+    return Observable.throw({clientMessage: message});
+}
+
+let successObservable = Observable.empty();
+export function success() {
+    return successObservable;
 }
 
 //Observable sockets wrapper class
