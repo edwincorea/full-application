@@ -6,6 +6,7 @@ import socketIo from "socket.io";
 import chalk from "chalk";
 import {Observable} from "rxjs";
 
+import "shared/operators"; //safe subscriptions
 import {ObservableSocket} from "../shared/observable-socket";
 
 import {UsersModule} from "./modules/users";

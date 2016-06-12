@@ -1,3 +1,5 @@
+import "shared/operators"; //safe subscriptions
+
 import "./application.scss";
 
 import * as services from "./services";
