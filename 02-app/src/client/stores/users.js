@@ -4,7 +4,7 @@ import {validateLogin} from "shared/validation/users";
 
 export class UsersStore {
     get currentUser() { return this._currentUser; }
-    get IsLoggedIn() { return this._currentUser && this._currentUser.IsLoggedIn; }
+    get isLoggedIn() { return this._currentUser && this._currentUser.isLoggedIn; }
 
     constructor(server) {
         this._server = server;
