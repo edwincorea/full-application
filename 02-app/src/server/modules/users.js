@@ -83,7 +83,7 @@ export class UsersModule extends ModuleBase {
         console.log(`User ${auth.name} logged out`);                
     }
 
-    //Add a client API
+    //Add an user API
     registerClient(client) {
         client.onActions({
             "users:list": () => {
