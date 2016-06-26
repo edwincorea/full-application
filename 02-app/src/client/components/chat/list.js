@@ -5,10 +5,10 @@ import {Observable} from "rxjs";
 import {ElementComponent} from "../../lib/component";
 
 export class ChatListComponent extends ElementComponent {
-    constructor(server, userStore, chatStore) {
+    constructor(server, usersStore, chatStore) {
         super("ul");
         this._server = server;
-        this._users = userStore;
+        this._users = usersStore;
         this._chat = chatStore;
         this.$element.addClass("chat-messages");        
     }
@@ -19,7 +19,7 @@ export class ChatListComponent extends ElementComponent {
             this._users.state$.map(userActionFactory),
             this._server.status$.map(serverStatusFactory))
             .filter(m => m)//filter nulls such as in userActionFactory...
-            .componentSubscribe(this, $newElement => {
+            .componentSubscribe(this, $newElement => {                
                 this.$element.append($newElement);
                 this.$element[0].scrollTop = this.$element[0].scrollHeight;
             });
@@ -27,12 +27,12 @@ export class ChatListComponent extends ElementComponent {
 }
 
 function userActionFactory({type, user}) {
-    if(type !== "add" || type !== "remove")
+    if(type !== "add" && type !== "remove")
         return null;
 
     return $(`<li class="user-action ${type}" />`).append([
         $(`<span class="author" />`).text(user.name).css("color", user.color),
-        $(`<span class="message" />`).text(type === "add" ? "joined" : "left").css("color", user.color),
+        $(`<span class="message" />`).text(type === "add" ? "joined" : "left"),
         $(`<time />`).text(moment().format("h:mm:ss a"))
     ]);
 }
