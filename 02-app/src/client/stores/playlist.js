@@ -9,7 +9,7 @@ export class PlaylistStore {
 
         this.state$ = events$
             .scan(({state}, op) => op(state), {state: defaultState})
-            .publish();
+            .publishReplay(1);
 
         this.state$.connect();
 
