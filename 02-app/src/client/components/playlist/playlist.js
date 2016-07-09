@@ -23,7 +23,7 @@ class PlaylistComponent extends ComponentBase {
         const $title = this._$mount.find("> h1");
         $title.text("Playlist");
         
-        const toolbar = new PlaylistToolbarComponent();
+        const toolbar = new PlaylistToolbarComponent(this._playlist);
         toolbar.attach(this._$mount); //attach toolbar to mount point (playlist)
         
         this._$chrome = $(`<div class="chrome" />`).appendTo(this._$mount); //append chrome element to mount point (playlist) 
