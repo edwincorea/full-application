@@ -1,5 +1,6 @@
 import $ from "jquery";
 import moment from "moment";
+import {Observable} from "rxjs";
 
 import {ElementComponent} from "../../lib/component";
 
@@ -32,8 +33,9 @@ export class PlaylistListComponent extends ElementComponent {
         //     console.log(state);
         // });
 
-        this._playlist.state$
-            .filter(a => a.type === "list")
+        Observable.merge(
+            this._playlist.state$.first(),
+            this._playlist.actions$.filter(a => a.type === "list"))            
             .componentSubscribe(this, ({state}) => {
                 $list.empty();
                 itemsMap = {};
@@ -43,6 +45,33 @@ export class PlaylistListComponent extends ElementComponent {
                     component.attach($list);
                 }
             });
+
+        this._playlist.actions$
+            .filter(a => a.type === "add")
+            .componentSubscribe(this, ({source, addAfter}) => {
+                const component = new PlaylistItemComponent(source);
+                component.attach($list);
+
+                itemsMap[source.id] = component;
+                this._addItem(component, addAfter ? itemsMap[addAfter.id] : null);
+            });          
+    }
+
+    _addItem(component, addAfterComponent) {
+        if(addAfterComponent)
+            addAfterComponent.$element.after(component.$element);
+        else
+            this.$element.prepend(component.$element);
+
+        const oldHeight = component.$element.height();
+        component.$element
+            .addClass("selected")
+            .css({height: 0, opacity: 0})
+            .animate({height: oldHeight, opacity: 1}, 250, () => {
+                component.$element
+                    .removeClass("selected")
+                    .css({height: "", opacity: ""});
+            });                    
     }
 }
 
