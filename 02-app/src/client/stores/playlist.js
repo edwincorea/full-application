@@ -8,7 +8,8 @@ export class PlaylistStore {
         this._server = server;
         const events$ = Observable.merge(
             server.on$("playlist:list").map(opList),
-            server.on$("playlist:added").map(opAdd));
+            server.on$("playlist:added").map(opAdd),
+            server.on$("playlist:current").map(opCurrent));
 
         //change state: add
         this.actions$ = events$
@@ -17,12 +18,22 @@ export class PlaylistStore {
 
         this.state$ = this.actions$
             .publishReplay(1)
-            .startWith({state: defaultState});            
+            .startWith({state: defaultState});    
+
+        this.serverTime$ = this.actions$
+            .filter(a => atype == "current")
+            .map(a => a.state.current)
+            .publishReplay(1);
 
         this.actions$.connect();
+        this.serverTime$.connect();
 
         server.on("connect", () => {
-            server.emit("playlist:list");
+            //get the list and after that, get the currently playing item
+            server.emitAction$("playlist:list")
+                .subscribe(() => {
+                    server.emit("playlist:current");
+                });
         });
     }
 
@@ -76,6 +87,32 @@ function opAdd({source, afterId}) {
     };
 }
 
+function opCurrent({id, time}) {
+    return state => {
+        const source = state.map[id];
+        if (!source)
+            return opError(state, `Cannot find item with id ${id}`);
+
+        //create new object only when state current changes, otherwise mutate current playlist object
+        if (!state.current || state.current.source != source) {
+            state.current = {
+                source: source,
+                time: time,
+                progress: calculateProgress(time, source)
+            };
+        }
+        else {
+            state.current.time = time;
+            state.current.progress = calculateProgress(time, source); 
+        }
+
+        return {
+            type: "current",
+            state: state
+        };
+    };
+}
+
 function opError(state, error) {
     console.error(error);
     return {
@@ -84,3 +121,7 @@ function opError(state, error) {
         state: state        
     };
 } 
+
+function calculateProgress(time, source) {
+    return Math.floor(Math.min(time / source.totalTime, 1) * 100);
+}

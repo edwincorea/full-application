@@ -54,7 +54,47 @@ export class PlaylistListComponent extends ElementComponent {
 
                 itemsMap[source.id] = component;
                 this._addItem(component, addAfter ? itemsMap[addAfter.id] : null);
-            });          
+            });    
+
+        // ---------------------
+        // Current Item
+        let lastComponent = null;
+        this._playlist.serverTime$
+            .componentSubscribe(this, current => {
+                //there's nothing playing
+                if (current == null) {                    
+                    if (lastComponent != null) {
+                        lastComponent.isPlaying = false;
+                        lastComponent = null;
+                    }
+
+                    return;                        
+                }
+
+                const currentComponent = itemsMap[current.source.id];
+                if (currentComponent == null) {
+                    console.error(`Cannot find component for ${current.source.id} / ${current.source.title}`);
+                    return;
+                }
+
+                if (lastComponent != currentComponent) {
+                    if (lastComponent != null)
+                        lastComponent.isPlaying = false;
+                    
+                    lastComponent = currentComponent;
+                    currentComponent.isPlaying = true;
+
+                    //animation here for scroll window
+                    const scrollTop = currentComponent.$element.offset().top - 
+                        this.$element.offset().top + 
+                        this.$element.scrollTop() -
+                        currentComponent.$element.height() * 2;
+
+                    this._$mount.animate({ scrollTop });
+                }
+
+                currentComponent.progress = current.progress;
+            });   
     }
 
     _addItem(component, addAfterComponent) {
