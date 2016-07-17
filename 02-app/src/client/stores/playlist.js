@@ -21,7 +21,7 @@ export class PlaylistStore {
             .startWith({state: defaultState});    
 
         this.serverTime$ = this.actions$
-            .filter(a => atype == "current")
+            .filter(a => a.type == "current")
             .map(a => a.state.current)
             .publishReplay(1);
 

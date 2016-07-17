@@ -84,7 +84,7 @@ export class PlaylistListComponent extends ElementComponent {
                     lastComponent = currentComponent;
                     currentComponent.isPlaying = true;
 
-                    //animation here for scroll window
+                    //animation here for scrolling additional item into view, with two additional items' height as padding
                     const scrollTop = currentComponent.$element.offset().top - 
                         this.$element.offset().top + 
                         this.$element.scrollTop() -
@@ -116,6 +116,14 @@ export class PlaylistListComponent extends ElementComponent {
 }
 
 class PlaylistItemComponent extends ElementComponent {
+    set isPlaying(isPlaying) {
+        this._setClass("is-playing", isPlaying);
+    }
+
+    set progress(progress) {
+        this._$progress.css("width", `${progress}%`);
+    }
+
     constructor(source) {
         super("li");
         this._source = source;
