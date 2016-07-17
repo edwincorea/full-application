@@ -67,7 +67,7 @@ app.get("/", (req, res) => {
 
 //--------------------------------------------
 // Services
-const videoServices = [new YoutubeService()];
+const videoServices = [new YoutubeService("AIzaSyDbSHCqswT5EouPlGlVXD8P3WH4r68lT-Y")];
 const playlistRepository = new FileRepository("./data/playlist.json");
 
 //--------------------------------------------
