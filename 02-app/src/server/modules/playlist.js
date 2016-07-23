@@ -147,7 +147,7 @@ export class PlaylistModule extends ModuleBase {
             } : { 
                 id: null, 
                 time: 0
-            }
+            };
     } 
 
     registerClient(client) {
