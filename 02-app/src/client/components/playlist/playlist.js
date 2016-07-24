@@ -32,7 +32,7 @@ class PlaylistComponent extends ComponentBase {
         const list = new PlaylistListComponent(this._playlist, this._users);
         list.attach(this._$scrollArea); //attach list to scroll area
         
-        const contextMenu = new PlaylistContextMenuComponent();
+        const contextMenu = new PlaylistContextMenuComponent(this._playlist, this._users, list.$element);
         contextMenu.attach(this._$scrollArea); //attach list to scroll area
         
         const chrome = new PlaylistChromeComponent();
