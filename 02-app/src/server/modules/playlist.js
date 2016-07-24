@@ -168,7 +168,18 @@ export class PlaylistModule extends ModuleBase {
                     return fail("You must be logged in to do that");
 
                 return this.addSourceFromUrl$(url);                    
-            }
+            },
+
+            "playlist:set-current": ({id}) => {
+                if (!isLoggedIn())
+                    return fail("You must be logged in to do that");
+
+                const source = this.getSourceById(id);   
+                if (!source)
+                    return fail(`Cannot find source ${id}`);
+
+                this.setCurrentSource(source);                    
+            } 
         });
     }
 } 

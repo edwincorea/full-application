@@ -128,6 +128,10 @@ class PlaylistItemComponent extends ElementComponent {
         this._$progress.css("width", `${progress}%`);
     }
 
+    get source() {
+        return this._source;
+    }
+
     constructor(source) {
         super("li");
         this._source = source;

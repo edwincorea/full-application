@@ -15,8 +15,6 @@ export class PlaylistContextMenuComponent extends ElementComponent {
     }
 
     _onAttach() {
-        /* eslint-disable no-unused-vars */ 
-
         const $playButton = $(`
             <a href="#" class="play">
                 <i class="fa fa-play-circle" /> Play
@@ -68,5 +66,24 @@ export class PlaylistContextMenuComponent extends ElementComponent {
 
                 this.$element.css("top", targetPosition);                    
             });
+
+        //mapping play button event clicks to a function which returns a function which either set current source or delete it (observables). 
+        const setCurrentItem$ = Observable.fromEventNoDefault($playButton, "click")
+            .map(() => component => this._playlist.setCurrentSource$(component.source));
+            //.map(function() { return function(component) { return this._playlist.setCurrentSource$(component.source) } });            
+
+        const deleteItem$ = Observable.fromEventNoDefault($deleteButton, "click")
+            .map(() => component => this._playlist.deleteSource$(component.source));                        
+            //.map(function() { return function(component) { return this._playlist.deleteSource$(component.source) } });
+
+        Observable.merge(setCurrentItem$, deleteItem$)
+            .withLatestFrom(selectedItem$)
+            .flatMap(([op, item]) => op(item).catchWrap())
+            .componentSubscribe(this, response => {
+                if (response && response.error) 
+                    alert(response.error.message || "Unknown Error");
+                else
+                    selectedItemSubject$.next(null);
+            });            
     }
 }
