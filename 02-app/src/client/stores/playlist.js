@@ -17,8 +17,9 @@ export class PlaylistStore {
             .scan(({state}, op) => op(state), {state: defaultState})
             .publish();
 
-        this.state$ = this.actions$
-            .publishReplay(1)
+        const publishedState$ = this.actions$.publishReplay(1); 
+        
+        this.state$ = publishedState$
             .startWith({state: defaultState});    
 
         this.serverTime$ = this.actions$
@@ -28,6 +29,7 @@ export class PlaylistStore {
 
         this.actions$.connect();
         this.serverTime$.connect();
+        publishedState$.connect();
 
         server.on("connect", () => {
             //get the list and after that, get the currently playing item
