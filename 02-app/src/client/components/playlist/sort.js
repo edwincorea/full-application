@@ -46,9 +46,12 @@ export class PlaylistSortComponent extends ComponentBase {
 
                 return mouseMove$
                     .startWith(startEvent) //populating the stream with start event
-                    .map(e => $(document.elementFromPoint(e.clientX, e.clientY - halfItemHeight).closest("li")))
+                    .map(e => {
+                        const $element = $(document.elementFromPoint(e.clientX, e.clientY - halfItemHeight)); 
+                        return $element && $element.closest("li");
+                    })
                     .map($element => {
-                        const toComponent = $element.data("component");
+                        const toComponent = $element && $element.data("component");
                         if(target.to == toComponent)
                             return target;
 
@@ -67,11 +70,12 @@ export class PlaylistSortComponent extends ComponentBase {
                         $fromElement.removeClass("dragging");
                         this._$html.removeClass("sorting-playlist");
                     });                    
-            });
+            })
+            .flatMap(({from, to}) => this._playlist.moveSource$(from.source.id, to && to.source.id).catchWrap());
 
-        //testing sorting stream subscribing to it
         sortOperations$.componentSubscribe(this, result => {
-            console.log(result);
+            if (result && result.error)
+                alert(result.error.message || "Unknown Error");
         });
     }
 }

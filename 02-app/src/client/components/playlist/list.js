@@ -57,9 +57,16 @@ export class PlaylistListComponent extends ElementComponent {
             });
 
         this._playlist.actions$
+            .filter(a => a.type === "move")
+            .componentSubscribe(this, ({fromSource, toSource}) => {
+                const fromComponent = itemsMap[fromSource.id];
+                const toComponent = toSource ? itemsMap[toSource.id] : null;
+                this._moveItem(fromComponent, toComponent);                
+            });            
+        
+        this._playlist.actions$
             .filter(a => a.type === "remove")
             .componentSubscribe(this, ({source}) => {
-                console.log(typeof(source));                
                 const component = itemsMap[source.id];
                 this._removeItem(component);
             });
@@ -121,6 +128,14 @@ export class PlaylistListComponent extends ElementComponent {
                     .removeClass("selected")
                     .css({height: "", opacity: ""});
             });                    
+    }
+
+    _moveItem(fromComponent, toComponent) {
+        if (toComponent) {
+            toComponent.$element.after(fromComponent.$element);
+        } else {
+            this.$element.prepend(fromComponent.$element);
+        }
     }
 
     _removeItem(component) {

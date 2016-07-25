@@ -10,6 +10,7 @@ export class PlaylistStore {
             server.on$("playlist:list").map(opList),
             server.on$("playlist:added").map(opAdd),
             server.on$("playlist:current").map(opCurrent),
+            server.on$("playlist:moved").map(opMove),
             server.on$("playlist:removed").map(opRemove));
 
         //change state: add
@@ -54,6 +55,13 @@ export class PlaylistStore {
 
     deleteSource$(source) {
         return this._server.emitAction$("playlist:remove", { id: source.id });
+    }
+
+    moveSource$(fromId, toId) {
+        if (fromId == toId)
+            return Observable.empty();
+
+        return this._server.emitAction$("playlist:move", {fromId, toId});            
     }
 }
 
@@ -125,6 +133,34 @@ function opCurrent({id, time}) {
 
         return {
             type: "current",
+            state: state
+        };
+    };
+}
+
+function opMove({fromId, toId}) {
+    return state => {
+        const fromSource = state.map[fromId];
+        if (!fromSource)
+            return opError(state, `Could not move source, from item ${fromId} not found`);
+
+        let toSource = null;
+        if (toId) {
+            toSource = state.map[toId];
+            if (!toSource)
+                return opError(state, `Could not move source, to item ${toId} not found`);
+        }
+
+        const fromIndex = state.list.indexOf(fromSource);
+        state.list.splice(fromIndex, 1);
+
+        const toIndex = toSource ? state.list.indexOf(toSource) + 1 : 0;
+        state.list.splice(toIndex, 0, fromSource);
+
+        return {
+            type: "move",
+            fromSource: fromSource,
+            toSource: toSource,
             state: state
         };
     };
