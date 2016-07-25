@@ -281,7 +281,7 @@ section.playlist .playlist-list {
             }            
         }
 
-        &.selected, &.dragging {
+        &.selected, &.dragging, &.moving {
             position: relative;
             z-index: 1;
             background: lighten($border-panel, 10%);
