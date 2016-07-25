@@ -68,15 +68,15 @@ export class PlaylistContextMenuComponent extends ElementComponent {
             });
 
         //mapping play button event clicks to a function which returns a function which either set current source or delete it (observables). 
-        const setCurrentItem$ = Observable.fromEventNoDefault($playButton, "click")
+        const setCurrentSource$ = Observable.fromEventNoDefault($playButton, "click")
             .map(() => component => this._playlist.setCurrentSource$(component.source));
             //.map(function() { return function(component) { return this._playlist.setCurrentSource$(component.source) } });            
 
-        const deleteItem$ = Observable.fromEventNoDefault($deleteButton, "click")
+        const deleteSource$ = Observable.fromEventNoDefault($deleteButton, "click")
             .map(() => component => this._playlist.deleteSource$(component.source));                        
             //.map(function() { return function(component) { return this._playlist.deleteSource$(component.source) } });
 
-        Observable.merge(setCurrentItem$, deleteItem$)
+        Observable.merge(setCurrentSource$, deleteSource$)
             .withLatestFrom(selectedItem$)
             .flatMap(([op, item]) => op(item).catchWrap())
             .componentSubscribe(this, response => {

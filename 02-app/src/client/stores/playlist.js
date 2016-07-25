@@ -9,7 +9,8 @@ export class PlaylistStore {
         const events$ = Observable.merge(
             server.on$("playlist:list").map(opList),
             server.on$("playlist:added").map(opAdd),
-            server.on$("playlist:current").map(opCurrent));
+            server.on$("playlist:current").map(opCurrent),
+            server.on$("playlist:removed").map(opRemove));
 
         //change state: add
         this.actions$ = events$
@@ -47,6 +48,10 @@ export class PlaylistStore {
 
     setCurrentSource$(source) {
         return this._server.emitAction$("playlist:set-current", { id: source.id });
+    }
+
+    deleteSource$(source) {
+        return this._server.emitAction$("playlist:remove", { id: source.id });
     }
 }
 
@@ -95,25 +100,47 @@ function opAdd({source, afterId}) {
 
 function opCurrent({id, time}) {
     return state => {
-        const source = state.map[id];
-        if (!source)
-            return opError(state, `Cannot find item with id ${id}`);
+        if (id == null) {
+            state.current = {source: null, time: 0, progress: 0};            
+        } else {
+            const source = state.map[id];
+            if (!source)
+                return opError(state, `Cannot find item with id ${id}`);
 
-        //create new object only when state current changes, otherwise mutate current playlist object
-        if (!state.current || state.current.source != source) {
-            state.current = {
-                source: source,
-                time: time,
-                progress: calculateProgress(time, source)
-            };
-        }
-        else {
-            state.current.time = time;
-            state.current.progress = calculateProgress(time, source); 
+            //create new object only when state current changes, otherwise mutate current playlist object
+            if (!state.current || state.current.source != source) {
+                state.current = {
+                    source: source,
+                    time: time,
+                    progress: calculateProgress(time, source)
+                };
+            }
+            else {
+                state.current.time = time;
+                state.current.progress = calculateProgress(time, source); 
+            }
         }
 
         return {
             type: "current",
+            state: state
+        };
+    };
+}
+
+function opRemove({id}) {
+    return state => {
+        const source = state.map[id];
+        if (!source)
+            return opError(state, `Could not remove source with id ${id}, as it was not found`);
+
+        const index = state.list.indexOf(source);
+        state.list.splice(index, 1);
+        delete state.map[id];            
+
+        return {
+            type: "remove",
+            source: source,
             state: state
         };
     };

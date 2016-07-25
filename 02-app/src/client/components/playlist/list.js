@@ -54,7 +54,16 @@ export class PlaylistListComponent extends ElementComponent {
 
                 itemsMap[source.id] = component;
                 this._addItem(component, addAfter ? itemsMap[addAfter.id] : null);
-            });    
+            });
+
+        this._playlist.actions$
+            .filter(a => a.type === "remove")
+            .componentSubscribe(this, ({source}) => {
+                console.log(typeof(source));                
+                const component = itemsMap[source.id];
+                this._removeItem(component);
+            });
+                
 
         // ---------------------
         // Current Item
@@ -62,7 +71,7 @@ export class PlaylistListComponent extends ElementComponent {
         this._playlist.serverTime$
             .componentSubscribe(this, current => {
                 //there's nothing playing
-                if (current == null) {                    
+                if (current.source == null) {                    
                     if (lastComponent != null) {
                         lastComponent.isPlaying = false;
                         lastComponent = null;
@@ -112,6 +121,14 @@ export class PlaylistListComponent extends ElementComponent {
                     .removeClass("selected")
                     .css({height: "", opacity: ""});
             });                    
+    }
+
+    _removeItem(component) {
+        component.$element
+            .addClass("remove")
+            .animate({opacity: 0, height: 0}, 250, () => {
+                component.detach();
+            });
     }
 }
 
