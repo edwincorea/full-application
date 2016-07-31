@@ -1,10 +1,11 @@
 import {Observable} from "rxjs";
+import $ from "jquery";
 
 import {ElementComponent} from "../../../lib/component";
 
 export class YoutubePlayer extends ElementComponent {
     get currentTime() {
-        return 0;
+        return this._player.getCurrentTime();
     }
 
     constructor() {
@@ -18,22 +19,45 @@ export class YoutubePlayer extends ElementComponent {
     init$() {
         this.$element.hide();
 
+        //wrapper around YT player
+        const $playerElement = $(`<div />`).appendTo(this.$element); 
+
         return new Observable(observer => {
-            observer.complete();
+            window.onYouTubeIframeAPIReady = () => {
+                this._player = new window.YT.Player($playerElement[0], {
+                    width: "100%",
+                    height: "100%",
+                    videoId: "",
+                    playerVars: {
+                        disablekb: 1,
+                        enablejsapi: 1,
+                        modestbranding: 1,
+                        iv_load_policy: 3,
+                        rel: 0
+                    },
+                    events: {
+                        onReady: () => {
+                            observer.complete(); //complete asynchronous sequence
+                        }
+                    }
+                });
+            };
+
+            $(`<script src="https://www.youtube.com/iframe_api" />`).appendTo("body");
         }); 
     }
 
     play(source, time) {
-        console.log(`Youtube: Playing ${source.title} at ${time}`);
         this.$element.show();
+        this._player.loadVideoById(source.url, time);
     }
 
     stop() {
-        console.log(`Youtube: Stopping`);
         this.$element.hide();
+        this._player.pauseVideo();
     }
 
     seek(time) {
-        console.log(`Youtube: Seeking to ${time}`);
+        this._player.seekTo(time);
     }
 }

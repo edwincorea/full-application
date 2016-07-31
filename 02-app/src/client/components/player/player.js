@@ -25,6 +25,13 @@ class PlayerComponent extends ElementComponent {
             youtube: new YoutubePlayer()
         };
 
+        for (let type in this._players) {
+            if (!this._players.hasOwnProperty(type))
+                continue;
+
+            this._players[type].attach(this.$element);
+        }
+
         const initList = _.map(this._players, player => player.init$());
         Observable.merge(...initList)
             .toArray()
@@ -42,6 +49,7 @@ class PlayerComponent extends ElementComponent {
     _playersAttached() {
         let lastSource = null,
             lastPlayer = null;
+
         this._playlist.serverTime$
             .componentSubscribe(this, ({source, time}) => {
                 if (!source) {
@@ -54,7 +62,6 @@ class PlayerComponent extends ElementComponent {
                 }
 
                 const player = this._players[source.type];
-
                 if (source != lastSource) {                    
                     if (lastPlayer && player != lastPlayer) {
                         lastPlayer.stop();
